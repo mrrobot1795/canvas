@@ -23,7 +23,7 @@ function App() {
     };
 
     try {
-      const response = await fetch('/Backend/models/template', {
+      const response = await fetch('http://localhost:5000/api/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(templateData),

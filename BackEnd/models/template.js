@@ -18,7 +18,7 @@ const templateSchema = new Schema({
     y: { type: Number, required: true },
     width: { type: Number, required: true },
     height: { type: Number, required: true },
-    rotation: { type: Number, required: true },
+    rotation: { type: Number, required: false },
   }],
 }, {
   timestamps: true, // Adds createdAt and updatedAt fields automatically

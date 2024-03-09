@@ -1,14 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const Template = require('../models/template'); // Ensure this path matches the location of your template model file
+const Template = require('../models/template');
 
+
+const app = express();
+app.use(express.json());
 // Create a new template
 router.post('/', async (req, res) => {
+  // res.header("Access-Control-Allow-Origin", "*");
+  // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  
   const template = new Template(req.body);
   try {
     const savedTemplate = await template.save();
     res.status(201).json(savedTemplate);
+    console.log("Received data:", req.body);
   } catch (err) {
+    console.error("Error saving template:", err);
     res.status(400).json({ message: err.message });
   }
 });
