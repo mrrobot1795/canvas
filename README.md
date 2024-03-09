@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 # Project Name
+=======
+# Canvas
+>>>>>>> ff0a0236739f8c8ef388ec9ce561d9fd9b967488
 
 A comprehensive web application designed for image annotation and template management. This project is structured into two main components: the frontend, developed with React, and the backend, powered by Express and MongoDB. The application allows users to upload images, annotate them with rectangles, create, save, and reuse annotation templates with functionalities to scale, rotate, and move annotations.
 
