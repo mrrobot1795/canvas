@@ -7,8 +7,6 @@ const app = express();
 app.use(express.json());
 // Create a new template
 router.post('/', async (req, res) => {
-  // res.header("Access-Control-Allow-Origin", "*");
-  // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   const { name } = req.body;
   
   try {
@@ -40,7 +38,7 @@ router.get('/', async (req, res) => {
     const templates = await Template.find();
     const transformedTemplates = templates.map(template => ({
       ...template.toObject(),
-      id: template._id.toString(), // Convert _id to id
+      id: template._id.toString(),
   }));
     res.json(transformedTemplates);
   } catch (err) {

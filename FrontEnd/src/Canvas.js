@@ -27,9 +27,9 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
   const handleMouseDown = (e) => {
     if (selectedTool !== 'draw') return;
   
-    // Only start a new rectangle if we're not currently drawing
+    
     if (!isDrawing) {
-      setIsDrawing(true); // Start drawing
+      setIsDrawing(true); 
       const pos = e.target.getStage().getPointerPosition();
       const newRect = {
         x: pos.x,
@@ -41,9 +41,9 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
       };
       setAnnotations((prev) => [...prev, newRect]);
     } else {
-      // If currently drawing, finalize the current drawing
-      setIsDrawing(false); // Finalize drawing
-      // Don't start a new rectangle until the next mouse down event
+      
+      setIsDrawing(false); 
+      
     }
   };
 
@@ -54,7 +54,7 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
     const point = stage.getPointerPosition();
     setAnnotations((prev) =>
       prev.map((rect, index) =>
-        index === prev.length - 1 // Update the last rectangle
+        index === prev.length - 1 
           ? { ...rect, width: point.x - rect.x, height: point.y - rect.y }
           : rect
       )
@@ -67,18 +67,16 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
     // Finalize drawing
     if (newRect) {
       setAnnotations((prevAnnotations) => [...prevAnnotations, newRect]);
-      setNewRect(null); // Reset temporary rectangle
-      // setIsDrawing(false); // Stop drawing
+      setNewRect(null); 
     }
   };
 
   useEffect(() => {
     if (!transformerRef.current) return;
   
-    // Find the rectangle that is currently selected
+    
     const selectedRect = stageRef.current.findOne(`#${selectedRectId}`);
     
-    // Attach transformer to the selected rectangle
     if (selectedRect) {
       transformerRef.current.nodes([selectedRect]);
     } else {
@@ -89,17 +87,6 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
   }, [selectedRectId, annotations]);
   
 
-  // useEffect(() => {
-  //   if (transformerRef.current && onSelectAnnotation) {
-  //     const selected = annotations.find(a => a.isSelected);
-  //     if (selected) {
-  //       transformerRef.current.nodes([selected.ref.current]);
-  //       transformerRef.current.getLayer().batchDraw();
-  //     } else {
-  //       transformerRef.current.nodes([]);
-  //     }
-  //   }
-  // }, [annotations, onSelectAnnotation]);
 
   return (
   <div style={{ border: '1px solid #ddd', margin: '20px', boxShadow: '0px 0px 10px rgba(0,0,0,0.1)' }}>
@@ -110,8 +97,9 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
               image={konvaImage}
               scaleX={scale}
               scaleY={scale}
-              x={(stageRef.current ? stageRef.current.width() / 2 : window.innerWidth / 2) - (konvaImage.width / 2) * scale}
+              x={(stageRef.current ? stageRef.current.width()  /2 : window.innerWidth / 2) - (konvaImage.width / 2) * scale}
               y={(stageRef.current ? stageRef.current.height() / 2 : window.innerHeight / 2) - (konvaImage.height / 2) * scale}
+              
               rotation={imageRotation}
             />
           )}
@@ -121,17 +109,10 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
               {...annotation}
               id={annotation.id}
               draggable
-               onClick={() => setSelectedRectId(annotation.id)} // Update selected ID on click
-              stroke={selectedRectId === annotation.id ? 'blue' : 'black'} // Highlight if selected
-              strokeWidth={selectedRectId === annotation.id ? 4 : 2} // Thicker border if selected
+               onClick={() => setSelectedRectId(annotation.id)} 
+              stroke={selectedRectId === annotation.id ? 'blue' : 'black'} 
+              strokeWidth={selectedRectId === annotation.id ? 4 : 2} 
               onDragEnd={(e) => onTransformAnnotation(annotation.id, e)}
-              // onClick={(e) => {
-              //   // If the click is on the stage (background), clear the selection
-              //   if (e.target === e.target.getStage()) {
-              //     setSelectedRectId(null);
-              //   }
-              // }}
-              // // stroke="black"
               onTransformEnd={(e) => {
               const node = e.target;
               const scaleX = node.scaleX();
@@ -139,7 +120,6 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
               const rotation = node.rotation();
               const x = node.x();
               const y = node.y();
-      // Call onTransform using annotation.id instead of index
               onTransform(annotation.id, { x, y, rotation, scaleX, scaleY });
               }}
             />

@@ -14,8 +14,8 @@ function ImageTools({ onZoomIn, onZoomOut }) {
       left: '50%',
       transform: 'translateX(-50%)',
       display: 'flex',
-      borderRadius: '16px', // Rounded corners
-      overflow: 'hidden', // Ensures the Paper elevation shadow is contained within the border radius
+      borderRadius: '16px', 
+      overflow: 'hidden', 
     }}>
       <Paper elevation={3} sx={{ display: 'flex', backgroundColor: '#aaaaaa' }}>
         <Tooltip title="Zoom In">
@@ -24,9 +24,9 @@ function ImageTools({ onZoomIn, onZoomOut }) {
             size="large" 
             sx={{ 
               borderRadius: 0,
-              backgroundColor: '#666666', // Dark grey background for the button
+              backgroundColor: '#666666', 
               '&:hover': {
-                backgroundColor: '#555555', // Slightly darker on hover
+                backgroundColor: '#555555', 
               }
             }}>
             <ZoomInIcon />
@@ -38,9 +38,9 @@ function ImageTools({ onZoomIn, onZoomOut }) {
             size="large" 
             sx={{ 
               borderRadius: 0,
-              backgroundColor: '#666666', // Dark grey background for the button
+              backgroundColor: '#666666', 
               '&:hover': {
-                backgroundColor: '#555555', // Slightly darker on hover
+                backgroundColor: '#555555', 
               }
             }}>
             <ZoomOutIcon />

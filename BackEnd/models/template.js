@@ -5,14 +5,13 @@ const Schema = mongoose.Schema;
 const templateSchema = new Schema({
   name: {
     type: String,
-    required: true, // Ensures every template has a name
+    required: true, 
     trim: true,
-    unique: true, // Removes leading and trailing whitespace
+    unique: true, 
   },
   image: {
     type: String,
-    required: false, // Make it required if every template must be linked to an image
-    // You can add validation to ensure it's a URL if you're storing image URLs
+    required: false, 
   },
   rectangles: [{
     x: { type: Number, required: true },
@@ -22,7 +21,7 @@ const templateSchema = new Schema({
     rotation: { type: Number, required: false },
   }],
 }, {
-  timestamps: true, // Adds createdAt and updatedAt fields automatically
+  timestamps: true, 
 });
 
 const Template = mongoose.model('Template', templateSchema);

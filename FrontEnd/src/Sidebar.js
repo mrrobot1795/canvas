@@ -27,7 +27,7 @@ function Sidebar({ templates, uploadedImage, annotations, onSelectTemplate, onSa
   const handleSelectChange = (event) => {
     const value = event.target.value;
     if (value === "image") {
-      onSelectItem({ type: "image" }); // Assuming onSelectItem expects an object
+      onSelectItem({ type: "image" }); 
     } else if (value.startsWith('rect_')) {
       const rectIndex = parseInt(value.split('_')[1], 10);
       onSelectItem({ type: "rectangle", index: rectIndex });
@@ -37,7 +37,7 @@ function Sidebar({ templates, uploadedImage, annotations, onSelectTemplate, onSa
   const handleSaveClick = () => {
     if (templateName) {
       onSaveTemplate(templateName);
-      setTemplateName(''); // Reset template name input after saving
+      setTemplateName(''); 
     } else {
       alert('Please provide a name for the template.');
     }
@@ -50,7 +50,7 @@ function Sidebar({ templates, uploadedImage, annotations, onSelectTemplate, onSa
       overflow: 'auto',
       backgroundColor: '#aaaaaa',
       borderRight: '1px solid #eee',
-      padding: '16px', // Added padding for inner content
+      padding: '16px', 
     }}>
       {(uploadedImage || annotations.length > 0) && (
         <>
@@ -95,7 +95,7 @@ function Sidebar({ templates, uploadedImage, annotations, onSelectTemplate, onSa
           </Button>
         </>
       )}
-      <List sx={{ mt: 2 }}> {/* Added margin top for separation */}
+      <List sx={{ mt: 2 }}> {}
         {templates.map((template, index) => (
           <ListItem
             key={template.id}
@@ -136,7 +136,7 @@ function Sidebar({ templates, uploadedImage, annotations, onSelectTemplate, onSa
           </MenuItem>
         ))}
       </Select>
-      {/* Display selected template details here */}
+      {}
       </List>
     </Paper>  
   );
