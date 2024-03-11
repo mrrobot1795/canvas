@@ -9,11 +9,24 @@ app.use(express.json());
 router.post('/', async (req, res) => {
   // res.header("Access-Control-Allow-Origin", "*");
   // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  const { name } = req.body;
   
-  const template = new Template(req.body);
   try {
+    const existingTemplate = await Template.findOne({ name });
+
+    if (existingTemplate) {
+      return res.status(400).json({ message: 'A template with this name already exists.' });
+    }
+
+    const template = new Template(req.body);
     const savedTemplate = await template.save();
-    res.status(201).json(savedTemplate);
+
+    const transformedTemplate = {
+      ...savedTemplate.toObject(),
+      id: savedTemplate._id.toString(),
+    };
+
+    res.status(201).json(transformedTemplate);
     console.log("Received data:", req.body);
   } catch (err) {
     console.error("Error saving template:", err);
@@ -25,7 +38,11 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const templates = await Template.find();
-    res.json(templates);
+    const transformedTemplates = templates.map(template => ({
+      ...template.toObject(),
+      id: template._id.toString(), // Convert _id to id
+  }));
+    res.json(transformedTemplates);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -36,7 +53,11 @@ router.get('/:id', async (req, res) => {
   try {
     const template = await Template.findById(req.params.id);
     if (!template) return res.status(404).json({ message: 'Template not found' });
-    res.json(template);
+    const transformedTemplate = {
+      ...template.toObject(),
+      id: template._id.toString(),
+  };
+    res.json(transformedTemplate);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -46,7 +67,11 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const updatedTemplate = await Template.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updatedTemplate);
+    const transformedTemplate = {
+      ...updatedTemplate.toObject(),
+      id: updatedTemplate._id.toString(),
+  };
+  res.json(transformedTemplate);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -55,11 +80,17 @@ router.put('/:id', async (req, res) => {
 // Delete a template
 router.delete('/:id', async (req, res) => {
   try {
-    const template = await Template.findByIdAndDelete(req.params.id);
-    if (!template) return res.status(404).json({ message: 'Template not found' });
-    res.json({ message: 'Template deleted successfully' });
+    const { id } = req.params;
+    const deletedTemplate = await Template.findByIdAndDelete(id);
+
+    if (!deletedTemplate) {
+      return res.status(404).send({ message: 'Template not found' });
+    }
+
+    res.send({ message: 'Template deleted successfully' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error deleting template:', err);
+    res.status(500).send({ message: 'Failed to delete the template' });
   }
 });
 

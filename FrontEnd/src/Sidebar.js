@@ -7,10 +7,18 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
 import { Select, MenuItem } from '@mui/material';
-import { Button, TextField, Box } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 
 function Sidebar({ templates, uploadedImage, annotations, onSelectTemplate, onSaveTemplate, onDeleteTemplate, onSelectAnnotation,onSelectItem, onDeleteSelectedItem }) {
-  const [templateName, setTemplateName] = useState('');
+  const [templateName, setTemplateName] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  
+  const handleTemplateSelectionChange = (event) => {
+    const templateId = event.target.value;
+    console.log("Selected template ID:", templateId)
+    onSelectTemplate(templateId);
+  };
+
   const handleDeleteClick = (event, templateId) => {
     event.stopPropagation();
     onDeleteTemplate(templateId);
@@ -91,6 +99,7 @@ function Sidebar({ templates, uploadedImage, annotations, onSelectTemplate, onSa
         {templates.map((template, index) => (
           <ListItem
             key={template.id}
+            value={template.id}
             button
             onClick={() => onSelectTemplate(template)}
             sx={{
@@ -111,7 +120,25 @@ function Sidebar({ templates, uploadedImage, annotations, onSelectTemplate, onSa
           </ListItem>
         ))}
       </List>
-    </Paper>
+      <List sx={{ mt: 10 }}>
+      <Select
+        value={selectedTemplateId}
+        onChange={handleTemplateSelectionChange}
+        displayEmpty
+        fullWidth
+      >
+        <MenuItem value="">
+          <em>Saved Templates</em>
+        </MenuItem>
+        {templates.map((template) => (
+          <MenuItem key={template.id} value={template.id}>
+            {template.name}
+          </MenuItem>
+        ))}
+      </Select>
+      {/* Display selected template details here */}
+      </List>
+    </Paper>  
   );
 }
 

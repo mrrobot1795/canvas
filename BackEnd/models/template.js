@@ -6,7 +6,8 @@ const templateSchema = new Schema({
   name: {
     type: String,
     required: true, // Ensures every template has a name
-    trim: true, // Removes leading and trailing whitespace
+    trim: true,
+    unique: true, // Removes leading and trailing whitespace
   },
   image: {
     type: String,

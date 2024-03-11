@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Canvas from './Canvas';
 import Toolbar from './Toolbar';
@@ -14,7 +14,9 @@ function App() {
   const [imageURL, setImageURL] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedRectId, setSelectedRectId] = useState(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState(null);
 
+  
   const onSaveTemplate = async (templateName) => {
     const templateData = {
       name: templateName,
@@ -28,15 +30,46 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(templateData),
       });
-      if (!response.ok) throw new Error('Failed to save the template.');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save the template.');
+      }
       alert('Template saved successfully!');
+      fetchTemplates();
     } catch (error) {
       console.error('Error saving the template:', error);
       alert('Error saving the template.');
     }
   };
-  
-  
+
+
+    const fetchTemplates = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/templates');
+        if (!response.ok) {
+            throw new Error('Failed to fetch templates');
+        }
+        let templates = await response.json();
+    
+        // Assuming each template has a 'rectangles' array
+        // We map through the templates to add refs to rectangles
+        templates = templates.map(template => ({
+          ...template,
+          rectangles: template.rectangles.map(rect => ({
+            ...rect,
+            ref: React.createRef() // Attach a ref for each rectangle
+          }))
+        }));
+    
+        setTemplates(templates);
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+      }
+    };
+    
+    fetchTemplates();
+ 
+
   
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -54,18 +87,17 @@ function App() {
     if (!selectedItem) return;
 
     if (selectedItem.type === "image") {
-      setImageURL(null); // Clear the uploaded image URL
-      setSelectedItem(null); // Reset selection
+      setImageURL(null); 
+      setSelectedItem(null);
     } else if (selectedItem.type === "rectangle") {
-      // Remove the selected rectangle by index
       const newAnnotations = annotations.filter((_, index) => index !== selectedItem.index);
       setAnnotations(newAnnotations);
-      setSelectedItem(null); // Reset selection
+      setSelectedItem(null); 
     }
   };
 
   const addAnnotation = (newAnnotation) => {
-    const id = uuidv4(); // Generates a unique UUID
+    const id = uuidv4(); 
     const annotatedRectangle = { ...newAnnotation, id: id };
     setAnnotations(prev => [...prev, annotatedRectangle]);
   };
@@ -79,13 +111,37 @@ function App() {
     }));
   };
 
-  const handleSelectTemplate = (template) => {
-    setAnnotations(template.annotations || []);
-  };
+  const handleSelectTemplate = (templateId) => {
 
-  const handleDeleteTemplate = (templateId) => {
+    setSelectedTemplateId(templateId);
+    const selectedTemplate = templates.find(template => template.id === templateId);
+
+    if (selectedTemplate) {
+        setImageURL(selectedTemplate.image);
+        setAnnotations(selectedTemplate.rectangles);
+    } else {
+        console.error("Selected template not found");
+    }
+};
+
+const handleDeleteTemplate = async (templateId) => {
+  try {
+    const response = await fetch(`http://localhost:5000/api/templates/${templateId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete the template');
+    }
+
+    const data = await response.json();
+    console.log('Delete successful', data);
+
     setTemplates(templates.filter(template => template.id !== templateId));
-  };
+  } catch (error) {
+    console.error('Error deleting the template:', error);
+  }
+};
 
   const handleToolSelect = (tool) => {
     setSelectedTool(tool);
@@ -131,7 +187,7 @@ function App() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'row' }}>
-      <Sidebar templates={templates} onSelectTemplate={handleSelectTemplate} onDeleteTemplate={handleDeleteTemplate} uploadedImage={imageURL} annotations={annotations} onSelectItem={handleSelectItem} onDeleteSelectedItem={handleDeleteSelectedItem} onSaveTemplate={onSaveTemplate}/>
+      <Sidebar templates={templates} onSelectTemplate={handleSelectTemplate} onDeleteTemplate={handleDeleteTemplate} uploadedImage={imageURL} annotations={annotations} onSelectItem={handleSelectItem} onDeleteSelectedItem={handleDeleteSelectedItem} onSaveTemplate={onSaveTemplate} selectedTemplateId={selectedTemplateId}/>
       <div style={{ flexGrow: 1 }}>
         <Canvas
           annotations={annotations}
@@ -146,6 +202,7 @@ function App() {
           onZoomOut={handleZoomOut}
           onTransform={onTransform}
           selectedRectId={selectedRectId}
+          setSelectedRectId={setSelectedRectId}
         />
         <Toolbar onToolSelect={handleToolSelect} onImageUpload={handleImageUpload} onUndo={onUndo}/>
         <ImageTools onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />

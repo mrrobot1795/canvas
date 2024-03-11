@@ -6,46 +6,88 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
   const transformerRef = useRef();
   const stageRef = useRef();
   const [konvaImage] = useImage(imageURL);
+  const [selectedId, setSelectedId] = useState(null);
   const [newRect, setNewRect] = useState(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [imageRotation, setImageRotation] = useState(0);
   
   
+  useEffect(() => {
+    if (selectedId && transformerRef.current) {
+      const nodes = annotations.filter(a => a.id === selectedId).map(a => a.ref.current);
+      transformerRef.current.nodes(nodes.length > 0 ? [nodes[0]] : []);
+      transformerRef.current.getLayer().batchDraw();
+    }
+  }, [selectedId, annotations]);
+
+  const handleRotationChange = (e) => {
+    setImageRotation(e.target.value);
+  };
+
   const handleMouseDown = (e) => {
     if (selectedTool !== 'draw') return;
-    setIsDrawing(true);
-    const pos = e.target.getStage().getPointerPosition();
-    setNewRect({ x: pos.x, y: pos.y, width: 0, height: 0, id: `rect_${Date.now()}` });
+  
+    // Only start a new rectangle if we're not currently drawing
+    if (!isDrawing) {
+      setIsDrawing(true); // Start drawing
+      const pos = e.target.getStage().getPointerPosition();
+      const newRect = {
+        x: pos.x,
+        y: pos.y,
+        width: 0,
+        height: 0,
+        id: `rect_${Date.now()}`,
+        ref: React.createRef(),
+      };
+      setAnnotations((prev) => [...prev, newRect]);
+    } else {
+      // If currently drawing, finalize the current drawing
+      setIsDrawing(false); // Finalize drawing
+      // Don't start a new rectangle until the next mouse down event
+    }
   };
 
   const handleMouseMove = (e) => {
     if (!isDrawing) return;
+  
     const stage = e.target.getStage();
     const point = stage.getPointerPosition();
-    setNewRect((prevRect) => ({
-      ...prevRect,
-      width: point.x - prevRect.x,
-      height: point.y - prevRect.y,
-    }));
+    setAnnotations((prev) =>
+      prev.map((rect, index) =>
+        index === prev.length - 1 // Update the last rectangle
+          ? { ...rect, width: point.x - rect.x, height: point.y - rect.y }
+          : rect
+      )
+    );
   };
+  
+
 
   const handleMouseUp = () => {
     // Finalize drawing
     if (newRect) {
       setAnnotations((prevAnnotations) => [...prevAnnotations, newRect]);
       setNewRect(null); // Reset temporary rectangle
-      setIsDrawing(false); // Stop drawing
+      // setIsDrawing(false); // Stop drawing
     }
   };
 
   useEffect(() => {
-    // Ensure the transformer attaches to the selected rectangle
-    if (transformerRef.current) {
-      const stage = transformerRef.current.getStage();
-      const selectedNode = stage.findOne(`#${selectedRectId}`);
-      transformerRef.current.nodes(selectedNode ? [selectedNode] : []);
-      transformerRef.current.getLayer().batchDraw();
+    if (!transformerRef.current) return;
+  
+    // Find the rectangle that is currently selected
+    const selectedRect = stageRef.current.findOne(`#${selectedRectId}`);
+    
+    // Attach transformer to the selected rectangle
+    if (selectedRect) {
+      transformerRef.current.nodes([selectedRect]);
+    } else {
+      transformerRef.current.nodes([]);
     }
-  }, [selectedRectId]);
+  
+    transformerRef.current.getLayer().batchDraw();
+  }, [selectedRectId, annotations]);
+  
 
   // useEffect(() => {
   //   if (transformerRef.current && onSelectAnnotation) {
@@ -70,6 +112,7 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
               scaleY={scale}
               x={(stageRef.current ? stageRef.current.width() / 2 : window.innerWidth / 2) - (konvaImage.width / 2) * scale}
               y={(stageRef.current ? stageRef.current.height() / 2 : window.innerHeight / 2) - (konvaImage.height / 2) * scale}
+              rotation={imageRotation}
             />
           )}
           {annotations.map((annotation) => (
@@ -79,7 +122,7 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
               id={annotation.id}
               draggable
                onClick={() => setSelectedRectId(annotation.id)} // Update selected ID on click
-              stroke={selectedRectId === annotation.id ? 'red' : 'black'} // Highlight if selected
+              stroke={selectedRectId === annotation.id ? 'blue' : 'black'} // Highlight if selected
               strokeWidth={selectedRectId === annotation.id ? 4 : 2} // Thicker border if selected
               onDragEnd={(e) => onTransformAnnotation(annotation.id, e)}
               // onClick={(e) => {
@@ -112,6 +155,15 @@ function Canvas({ annotations, setAnnotations, scale, imageURL, selectedTool, on
           <Transformer ref={transformerRef} />
         </Layer>
       </Stage>
+      <div style={{ marginTop: '20px' }}>
+      <input
+        type="range"
+        min="-180"
+        max="180"
+        value={imageRotation}
+        onChange={handleRotationChange}
+      />
+    </div>
     </div>
   );
 }
